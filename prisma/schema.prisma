@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Epic 1: Curriculum Tracking
+model Book {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  category    String   // e.g., "Theology", "Logic", "History", "Fiqh"
+  stageLevel  Int      // Roadmap progression stage (1-4)
+  totalPages  Int
+  readPages   Int      @default(0)
+  status      String   @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  notes       Note[]
+}
+
+// Epic 2: Networked Notes (Zettelkasten)
+model Note {
+  id          String     @id @default(uuid())
+  bookId      String?    // Nullable if the note is a synthesis of multiple books
+  book        Book?      @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  title       String
+  content     String     @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Bi-directional Relations for Knowledge Graph
+  sourceLinks NoteLink[] @relation("SourceNote")
+  targetLinks NoteLink[] @relation("TargetNote")
+}
+
+model NoteLink {
+  id           String   @id @default(uuid())
+  sourceNoteId String
+  targetNoteId String
+  createdAt    DateTime @default(now())
+  
+  sourceNote   Note     @relation("SourceNote", fields: [sourceNoteId], references: [id], onDelete: Cascade)
+  targetNote   Note     @relation("TargetNote", fields: [targetNoteId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceNoteId, targetNoteId]) // Prevent duplicate links between the exact same notes
+}
+
+// Epic 3: Habit Tracker
+model Habit {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  frequency   String     @default("DAILY") // DAILY, WEEKLY
+  createdAt   DateTime   @default(now())
+  logs        HabitLog[]
+}
+
+model HabitLog {
+  id          String   @id @default(uuid())
+  habitId     String
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  logDate     DateTime @db.Date
+  isCompleted Boolean  @default(false)
+  evaluation  String?  @db.Text // Daily reflection/notes
+  
+  @@unique([habitId, logDate]) // Ensure only one log per habit per day
+}
