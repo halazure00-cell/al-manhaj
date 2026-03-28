@@ -25,7 +25,7 @@ Al-Manhaj adalah ekosistem pembelajaran dan pertumbuhan spiritual yang menggabun
 Buat `.env` di root:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public&sslmode=require"
 GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
@@ -50,7 +50,9 @@ GEMINI_API_KEY="your_gemini_api_key_here"
 3. Set environment variables di Project Settings:
    - `DATABASE_URL`
    - `GEMINI_API_KEY`
-4. Deploy.
+4. Pastikan build command menjalankan migrasi Prisma:
+   - `npx prisma generate && npx prisma migrate deploy && npm run build`
+5. Redeploy.
 
 `vercel.json` sudah mengatur:
 - `/api/*` -> serverless function `api/index`

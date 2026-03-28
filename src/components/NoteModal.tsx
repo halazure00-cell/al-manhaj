@@ -3,6 +3,7 @@ import { Note, Book } from '../types';
 import { X, Link as LinkIcon, Feather, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import { apiFetch } from '../lib/api';
 
 interface NoteModalProps {
   isOpen: boolean;
@@ -75,7 +76,7 @@ export default function NoteModal({ isOpen, onClose, onSave, note, books, allNot
     
     try {
       const prompt = `Critique my logic based on my database. Here is my current draft note titled "${formData.title}":\n\n${formData.content}`;
-      const res = await fetch('/api/ai/chat', {
+      const res = await apiFetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })

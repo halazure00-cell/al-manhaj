@@ -7,6 +7,7 @@ import { Plus, CheckSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTadzkirah } from '../hooks/useTadzkirah';
+import { apiFetch } from '../lib/api';
 
 export default function HabitTracker() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -31,7 +32,7 @@ export default function HabitTracker() {
 
   const fetchHabits = async () => {
     try {
-      const res = await fetch('/api/habits');
+      const res = await apiFetch('/api/habits');
       if (!res.ok) throw new Error('Failed to fetch habits');
       const data = await res.json();
       setHabits(data);
@@ -57,7 +58,7 @@ export default function HabitTracker() {
       const url = isEditing ? `/api/habits/${editingHabit.id}` : '/api/habits';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(habitData),
@@ -81,7 +82,7 @@ export default function HabitTracker() {
     if (!deleteConfirmId) return;
     const loadingToast = toast.loading('Menghapus kebiasaan...');
     try {
-      const res = await fetch(`/api/habits/${deleteConfirmId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/habits/${deleteConfirmId}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete habit');
@@ -98,7 +99,7 @@ export default function HabitTracker() {
     try {
       const dateObj = new Date(logDate + 'T00:00:00.000Z');
       
-      const res = await fetch(`/api/habits/${habitId}/logs`, {
+      const res = await apiFetch(`/api/habits/${habitId}/logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

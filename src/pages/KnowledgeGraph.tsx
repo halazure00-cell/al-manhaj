@@ -3,6 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { apiFetch } from '../lib/api';
 
 interface GraphNode {
   id: string;
@@ -38,7 +39,7 @@ export default function KnowledgeGraph() {
   useEffect(() => {
     const fetchGraphData = async () => {
       try {
-        const res = await fetch('/api/notes/graph');
+        const res = await apiFetch('/api/notes/graph');
         if (!res.ok) throw new Error('Failed to fetch graph data');
         const data = await res.json();
         setGraphData(data);

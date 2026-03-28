@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTadzkirah } from '../hooks/useTadzkirah';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
 
 export default function Zettelkasten() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -23,8 +24,8 @@ export default function Zettelkasten() {
   const fetchData = async () => {
     try {
       const [notesRes, booksRes] = await Promise.all([
-        fetch('/api/notes'),
-        fetch('/api/books')
+        apiFetch('/api/notes'),
+        apiFetch('/api/books')
       ]);
 
       if (!notesRes.ok || !booksRes.ok) {
@@ -57,7 +58,7 @@ export default function Zettelkasten() {
       const url = isEditing ? `/api/notes/${editingNote.id}` : '/api/notes';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(noteData),
@@ -71,7 +72,7 @@ export default function Zettelkasten() {
       const savedNote = await res.json();
 
       for (const targetId of newLinks) {
-        await fetch(`/api/notes/${savedNote.id}/links`, {
+        await apiFetch(`/api/notes/${savedNote.id}/links`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ targetNoteId: targetId })
@@ -79,7 +80,7 @@ export default function Zettelkasten() {
       }
 
       for (const targetId of removedLinks) {
-        await fetch(`/api/notes/${savedNote.id}/links/${targetId}`, {
+        await apiFetch(`/api/notes/${savedNote.id}/links/${targetId}`, {
           method: 'DELETE'
         });
       }
@@ -97,7 +98,7 @@ export default function Zettelkasten() {
     if (!deleteConfirmId) return;
     const loadingToast = toast.loading('Menghapus catatan...');
     try {
-      const res = await fetch(`/api/notes/${deleteConfirmId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/notes/${deleteConfirmId}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete note');

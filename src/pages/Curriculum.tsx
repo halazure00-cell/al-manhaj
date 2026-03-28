@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTadzkirah } from '../hooks/useTadzkirah';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../lib/api';
 
 const STAGES = [
   { id: 1, title: 'Fase 1: Dasar (Mubtadi)', description: 'Membangun fondasi ilmu agama.' },
@@ -30,7 +31,7 @@ export default function Curriculum() {
 
   const fetchBooks = async () => {
     try {
-      const res = await fetch('/api/books');
+      const res = await apiFetch('/api/books');
       if (!res.ok) throw new Error('Failed to fetch books');
       const data = await res.json();
       setBooks(data);
@@ -52,7 +53,7 @@ export default function Curriculum() {
       const url = isEditing ? `/api/books/${editingBook.id}` : '/api/books';
       const method = isEditing ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookData),
@@ -76,7 +77,7 @@ export default function Curriculum() {
     if (!deleteConfirmId) return;
     const loadingToast = toast.loading('Menghapus kitab...');
     try {
-      const res = await fetch(`/api/books/${deleteConfirmId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/books/${deleteConfirmId}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete book');
@@ -96,7 +97,7 @@ export default function Curriculum() {
       else if (newReadPages >= book.totalPages) newStatus = 'COMPLETED';
       else newStatus = 'IN_PROGRESS';
 
-      const res = await fetch(`/api/books/${book.id}`, {
+      const res = await apiFetch(`/api/books/${book.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ readPages: newReadPages, status: newStatus }),
