@@ -50,9 +50,12 @@ GEMINI_API_KEY="your_gemini_api_key_here"
 3. Set environment variables di Project Settings:
    - `DATABASE_URL`
    - `GEMINI_API_KEY`
-4. Pastikan build command menjalankan migrasi Prisma:
-   - `npx prisma generate && npx prisma migrate deploy && npm run build`
-5. Redeploy.
+4. Gunakan build command default dari repo (sudah diatur di `vercel.json`):
+   - `npm run build:vercel`
+5. (Opsional, direkomendasikan untuk production) Jalankan migrasi di pipeline terpisah atau aktifkan saat build dengan env:
+   - `RUN_PRISMA_MIGRATIONS=true`
+   - `PRISMA_MIGRATE_TIMEOUT_MS=60000` (opsional timeout)
+6. Redeploy.
 
 `vercel.json` sudah mengatur:
 - `/api/*` -> serverless function `api/index`
