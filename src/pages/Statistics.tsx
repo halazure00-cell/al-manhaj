@@ -23,6 +23,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import { apiFetch } from '../lib/api';
 
 interface StatsData {
   books: {
@@ -58,7 +59,7 @@ export default function Statistics() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/stats');
+      const res = await apiFetch('/api/stats');
       if (!res.ok) throw new Error('Failed to fetch statistics');
       const data = await res.json();
       setStats(data);

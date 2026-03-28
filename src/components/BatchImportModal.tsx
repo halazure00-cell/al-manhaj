@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, AlertCircle, CheckCircle2, FileJson } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from '../lib/api';
 
 interface BatchImportModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export default function BatchImportModal({ isOpen, onClose }: BatchImportModalPr
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/books/batch', {
+      const response = await apiFetch('/api/books/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
