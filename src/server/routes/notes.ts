@@ -1,9 +1,16 @@
 import { Router } from 'express';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { parseNoteCreate, parseNoteLink, parseNoteUpdate } from '../lib/validation';
 import { asyncHandler } from '../middleware/http';
 
 export const notesRouter = Router();
+
+
+function isPrismaUniqueConstraintError(error: unknown) {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+}
+
 
 notesRouter.get('/', asyncHandler(async (_req, res) => {
   const notes = await prisma.note.findMany({
@@ -91,8 +98,27 @@ notesRouter.post('/:id/links', asyncHandler(async (req, res) => {
     return res.json(existingLink);
   }
 
-  const link = await prisma.noteLink.create({ data: { sourceNoteId, targetNoteId } });
-  return res.status(201).json(link);
+  try {
+    const link = await prisma.noteLink.create({ data: { sourceNoteId, targetNoteId } });
+    return res.status(201).json(link);
+  } catch (error) {
+    if (isPrismaUniqueConstraintError(error)) {
+      const link = await prisma.noteLink.findFirst({
+        where: {
+          OR: [
+            { sourceNoteId, targetNoteId },
+            { sourceNoteId: targetNoteId, targetNoteId: sourceNoteId },
+          ],
+        },
+      });
+
+      if (link) {
+        return res.json(link);
+      }
+    }
+
+    throw error;
+  }
 }));
 
 notesRouter.delete('/:id/links/:targetId', asyncHandler(async (req, res) => {

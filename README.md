@@ -9,7 +9,7 @@ Al-Manhaj adalah ekosistem pembelajaran dan pertumbuhan spiritual yang menggabun
 
 ## Stack
 - **Frontend**: React + Vite + TypeScript + Tailwind.
-- **Backend API**: Express modular (`src/server/*`) dan kompatibel Vercel Functions (`api/index.ts`).
+- **Backend API**: Express modular (`src/server/*`) dan kompatibel Vercel Functions (`api/[[...route]].ts`).
 - **Database**: PostgreSQL + Prisma.
 - **AI**: Google GenAI SDK (Gemini) melalui endpoint backend (`/api/ai/chat`).
 
@@ -18,16 +18,26 @@ Al-Manhaj adalah ekosistem pembelajaran dan pertumbuhan spiritual yang menggabun
 - `src/server/routes/*`: endpoint per domain (books, notes, habits, stats, export, ai, health).
 - `src/server/lib/prisma.ts`: singleton Prisma client.
 - `src/server/lib/validation.ts`: validasi payload request.
-- `api/index.ts`: entrypoint serverless untuk Vercel.
+- `api/[[...route]].ts`: catch-all entrypoint serverless untuk Vercel API.
 - `vercel.json`: rewrite API + SPA fallback.
 
 ## Environment Variables
-Buat `.env` di root:
+Buat `.env` di root (bisa copy dari `.env.example`):
 
 ```env
+# Runtime pooled connection (dipakai aplikasi)
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public&sslmode=require"
+
+# Direct/non-pooled connection (wajib untuk Prisma migrate/introspect)
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public&sslmode=require"
+
 GEMINI_API_KEY="your_gemini_api_key_here"
+
+# Opsional: model Gemini backend
+GEMINI_MODEL="gemini-2.5-pro"
 ```
+
+> `DIRECT_URL` penting untuk menghindari kegagalan migrasi saat `DATABASE_URL` memakai pooled connection (mis. PgBouncer).
 
 ## Local Development
 1. Install dependency:
@@ -49,16 +59,20 @@ GEMINI_API_KEY="your_gemini_api_key_here"
 2. Import project di Vercel.
 3. Set environment variables di Project Settings:
    - `DATABASE_URL`
+   - `DIRECT_URL`
    - `GEMINI_API_KEY`
+   - `GEMINI_MODEL` (opsional)
 4. Gunakan build command default dari repo (sudah diatur di `vercel.json`):
    - `npm run build:vercel`
-5. Secara default, build Vercel akan menjalankan `prisma migrate deploy` agar schema selalu siap.
-   - Set `RUN_PRISMA_MIGRATIONS=false` jika ingin menonaktifkan (mis. migrasi ditangani pipeline terpisah).
-   - `PRISMA_MIGRATE_TIMEOUT_MS=60000` (opsional timeout)
+5. Kontrol perilaku migrasi build:
+   - `RUN_PRISMA_MIGRATIONS=true` (default) untuk mencoba `prisma migrate deploy`.
+   - `PRISMA_MIGRATIONS_REQUIRED=false` (default) agar build tetap lanjut jika migrasi gagal (menghindari single point of failure).
+   - `PRISMA_MIGRATIONS_REQUIRED=true` jika ingin build wajib gagal ketika migrasi gagal.
+   - `PRISMA_MIGRATE_TIMEOUT_MS=60000` (opsional timeout).
 6. Redeploy.
 
 `vercel.json` sudah mengatur:
-- `/api/*` -> serverless function `api/index`
+- `/api/*` -> serverless function catch-all `api/[[...route]]`
 - selain itu -> `index.html` untuk SPA routing.
 
 ## Catatan Keamanan

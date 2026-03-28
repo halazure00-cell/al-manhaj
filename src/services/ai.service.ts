@@ -78,11 +78,16 @@ export async function processAiQuery(prompt: string, prisma: PrismaClient) {
 
   // 3. Call Gemini API
   const ai = new GoogleGenAI({ apiKey });
-  
-  const fullPrompt = `CONTEXT DATA:\n${contextData}\n\nUSER PROMPT:\n${prompt}`;
+  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-pro';
+
+  const fullPrompt = `CONTEXT DATA:
+${contextData}
+
+USER PROMPT:
+${prompt}`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
+    model,
     contents: fullPrompt,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,

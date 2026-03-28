@@ -32,20 +32,37 @@ function run(command, args, { env = process.env, timeoutMs } = {}) {
   });
 }
 
+async function runMigrationsIfEnabled() {
+  const runMigrationsEnv = (process.env.RUN_PRISMA_MIGRATIONS ?? '').trim().toLowerCase();
+  const shouldRunMigrations = runMigrationsEnv === '' || runMigrationsEnv === 'true';
+  if (!shouldRunMigrations) {
+    console.log('[vercel-build] Skipping prisma migrate deploy during build.');
+    console.log('[vercel-build] Set RUN_PRISMA_MIGRATIONS=true (or unset it) to enable migrations.');
+    return;
+  }
+
+  const timeoutMs = Number(process.env.PRISMA_MIGRATE_TIMEOUT_MS || 60000);
+  const required = (process.env.PRISMA_MIGRATIONS_REQUIRED ?? '').trim().toLowerCase() === 'true';
+
+  console.log(`[vercel-build] Running prisma migrate deploy (timeout: ${timeoutMs}ms)...`);
+  try {
+    await run('npx', ['prisma', 'migrate', 'deploy'], { timeoutMs });
+  } catch (error) {
+    if (required) {
+      throw error;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[vercel-build] WARNING: prisma migrate deploy failed, continuing build. Reason: ${message}`);
+    console.warn('[vercel-build] Set PRISMA_MIGRATIONS_REQUIRED=true to fail build on migration errors.');
+  }
+}
+
 async function main() {
   console.log('[vercel-build] Generating Prisma client...');
   await run('npx', ['prisma', 'generate']);
 
-  const runMigrationsEnv = (process.env.RUN_PRISMA_MIGRATIONS ?? '').trim().toLowerCase();
-  const shouldRunMigrations = runMigrationsEnv === '' || runMigrationsEnv === 'true';
-  if (shouldRunMigrations) {
-    const timeoutMs = Number(process.env.PRISMA_MIGRATE_TIMEOUT_MS || 60000);
-    console.log(`[vercel-build] Running prisma migrate deploy (timeout: ${timeoutMs}ms)...`);
-    await run('npx', ['prisma', 'migrate', 'deploy'], { timeoutMs });
-  } else {
-    console.log('[vercel-build] Skipping prisma migrate deploy during build.');
-    console.log('[vercel-build] Set RUN_PRISMA_MIGRATIONS=true (or unset it) to enable migrations.');
-  }
+  await runMigrationsIfEnabled();
 
   console.log('[vercel-build] Building web app...');
   await run('npm', ['run', 'build']);
