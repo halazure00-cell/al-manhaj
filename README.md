@@ -52,8 +52,8 @@ GEMINI_API_KEY="your_gemini_api_key_here"
    - `GEMINI_API_KEY`
 4. Gunakan build command default dari repo (sudah diatur di `vercel.json`):
    - `npm run build:vercel`
-5. (Opsional, direkomendasikan untuk production) Jalankan migrasi di pipeline terpisah atau aktifkan saat build dengan env:
-   - `RUN_PRISMA_MIGRATIONS=true`
+5. Secara default, build Vercel akan menjalankan `prisma migrate deploy` agar schema selalu siap.
+   - Set `RUN_PRISMA_MIGRATIONS=false` jika ingin menonaktifkan (mis. migrasi ditangani pipeline terpisah).
    - `PRISMA_MIGRATE_TIMEOUT_MS=60000` (opsional timeout)
 6. Redeploy.
 
