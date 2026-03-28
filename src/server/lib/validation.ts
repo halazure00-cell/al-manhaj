@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import { BookStatus, HabitFrequency, type Prisma } from '@prisma/client';
 
 export class ValidationError extends Error {
   status = 400;
@@ -35,6 +35,23 @@ function readNumber(obj: Record<string, unknown>, key: string, required = true):
   return num;
 }
 
+
+
+function parseBookStatus(value: string): BookStatus {
+  if (!Object.values(BookStatus).includes(value as BookStatus)) {
+    throw new ValidationError('Field "status" must be one of: NOT_STARTED, IN_PROGRESS, COMPLETED');
+  }
+
+  return value as BookStatus;
+}
+
+function parseHabitFrequency(value: string): HabitFrequency {
+  if (!Object.values(HabitFrequency).includes(value as HabitFrequency)) {
+    throw new ValidationError('Field "frequency" must be DAILY or WEEKLY');
+  }
+
+  return value as HabitFrequency;
+}
 export function parseBookCreate(input: unknown): Prisma.BookCreateInput {
   const o = ensureObject(input);
   return {
@@ -44,7 +61,7 @@ export function parseBookCreate(input: unknown): Prisma.BookCreateInput {
     stageLevel: readNumber(o, 'stageLevel', true)!,
     totalPages: readNumber(o, 'totalPages', true)!,
     readPages: readNumber(o, 'readPages', false) ?? 0,
-    status: readString(o, 'status', false) ?? 'NOT_STARTED',
+    status: parseBookStatus(readString(o, 'status', false) ?? BookStatus.NOT_STARTED),
   };
 }
 
@@ -65,7 +82,7 @@ export function parseBookUpdate(input: unknown): Prisma.BookUpdateInput {
   if (stageLevel !== undefined) parsed.stageLevel = stageLevel;
   if (totalPages !== undefined) parsed.totalPages = totalPages;
   if (readPages !== undefined) parsed.readPages = readPages;
-  if (status !== undefined) parsed.status = status;
+  if (status !== undefined) parsed.status = parseBookStatus(status);
 
   return parsed;
 }
@@ -110,10 +127,7 @@ export function parseNoteLink(input: unknown) {
 
 export function parseHabitCreate(input: unknown): Prisma.HabitCreateInput {
   const o = ensureObject(input);
-  const frequency = readString(o, 'frequency', false) ?? 'DAILY';
-  if (!['DAILY', 'WEEKLY'].includes(frequency)) {
-    throw new ValidationError('Field "frequency" must be DAILY or WEEKLY');
-  }
+  const frequency = parseHabitFrequency(readString(o, 'frequency', false) ?? HabitFrequency.DAILY);
 
   return {
     title: readString(o, 'title', true)!,
@@ -130,13 +144,9 @@ export function parseHabitUpdate(input: unknown): Prisma.HabitUpdateInput {
   const description = o.description === null ? null : readString(o, 'description', false);
   const frequency = readString(o, 'frequency', false);
 
-  if (frequency && !['DAILY', 'WEEKLY'].includes(frequency)) {
-    throw new ValidationError('Field "frequency" must be DAILY or WEEKLY');
-  }
-
   if (title !== undefined) parsed.title = title;
   if (Object.prototype.hasOwnProperty.call(o, 'description')) parsed.description = description;
-  if (frequency !== undefined) parsed.frequency = frequency;
+  if (frequency !== undefined) parsed.frequency = parseHabitFrequency(frequency);
 
   return parsed;
 }
