@@ -34,7 +34,9 @@ DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public&sslmode=re
 GEMINI_API_KEY="your_gemini_api_key_here"
 
 # Opsional: model Gemini backend
-GEMINI_MODEL="gemini-2.5-pro"
+GEMINI_MODEL="gemini-2.5-flash"
+# Opsional: fallback model dipisah koma (dicoba berurutan jika model utama terkena quota)
+GEMINI_MODEL_FALLBACKS="gemini-2.0-flash-lite"
 ```
 
 > `DIRECT_URL` penting untuk menghindari kegagalan migrasi saat `DATABASE_URL` memakai pooled connection (mis. PgBouncer).
@@ -61,7 +63,8 @@ GEMINI_MODEL="gemini-2.5-pro"
    - `DATABASE_URL`
    - `DIRECT_URL`
    - `GEMINI_API_KEY`
-   - `GEMINI_MODEL` (opsional)
+   - `GEMINI_MODEL` (opsional, default `gemini-2.5-flash`)
+   - `GEMINI_MODEL_FALLBACKS` (opsional, daftar fallback dipisah koma)
 4. Gunakan build command default dari repo (sudah diatur di `vercel.json`):
    - `npm run build:vercel`
 5. Jalankan migrasi **terpisah** dari Vercel build (direkomendasikan):
