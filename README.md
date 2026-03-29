@@ -46,8 +46,8 @@ GEMINI_MODEL="gemini-2.5-pro"
    ```
 2. Generate Prisma client & jalankan migrasi:
    ```bash
-   npx prisma generate
-   npx prisma migrate dev
+   npm run db:generate
+   npm run db:migrate:dev
    ```
 3. Jalankan app lokal (API + frontend via middleware):
    ```bash
@@ -64,12 +64,15 @@ GEMINI_MODEL="gemini-2.5-pro"
    - `GEMINI_MODEL` (opsional)
 4. Gunakan build command default dari repo (sudah diatur di `vercel.json`):
    - `npm run build:vercel`
-5. Kontrol perilaku migrasi build:
-   - `RUN_PRISMA_MIGRATIONS=true` (default) untuk mencoba `prisma migrate deploy`.
+5. Jalankan migrasi **terpisah** dari Vercel build (direkomendasikan):
+   - `npm run db:migrate:deploy`
+6. Kontrol perilaku migrasi build (opsional, jika tetap ingin migrate saat build):
+   - `RUN_PRISMA_MIGRATIONS=false` (default) agar build Vercel tidak menjalankan migrasi secara otomatis.
+   - `RUN_PRISMA_MIGRATIONS=true` jika ingin build mencoba `prisma migrate deploy`.
    - `PRISMA_MIGRATIONS_REQUIRED=false` (default) agar build tetap lanjut jika migrasi gagal (menghindari single point of failure).
    - `PRISMA_MIGRATIONS_REQUIRED=true` jika ingin build wajib gagal ketika migrasi gagal.
    - `PRISMA_MIGRATE_TIMEOUT_MS=60000` (opsional timeout).
-6. Redeploy.
+7. Redeploy.
 
 `vercel.json` sudah mengatur:
 - `/api/*` -> serverless function catch-all `api/[[...route]]`
@@ -87,3 +90,10 @@ GEMINI_MODEL="gemini-2.5-pro"
 - Statistik gabungan
 - Export data JSON
 - AI mudzakarah berbasis konteks data personal
+
+
+## Workflow Mobile-Only (Android)
+- Gunakan **GitHub web editor** untuk perubahan kode/migrasi ringan.
+- Gunakan **Supabase Dashboard (SQL Editor)** untuk validasi query & monitoring tabel.
+- Gunakan **Vercel Dashboard** untuk set env (`DATABASE_URL`, `DIRECT_URL`, `RUN_PRISMA_MIGRATIONS=false`) dan trigger redeploy.
+- Jalankan migrasi production sebagai langkah release terpisah (`npm run db:migrate:deploy`) agar deploy lebih stabil.

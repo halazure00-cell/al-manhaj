@@ -32,12 +32,32 @@ function run(command, args, { env = process.env, timeoutMs } = {}) {
   });
 }
 
+
+function validateDbEnv({ shouldRunMigrations }) {
+  const databaseUrl = (process.env.DATABASE_URL ?? '').trim();
+  const directUrl = (process.env.DIRECT_URL ?? '').trim();
+
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is required for build/runtime.');
+  }
+
+  if (shouldRunMigrations) {
+    if (!directUrl) {
+      throw new Error('DIRECT_URL is required when RUN_PRISMA_MIGRATIONS=true.');
+    }
+
+    if (directUrl === databaseUrl) {
+      console.warn('[vercel-build] WARNING: DIRECT_URL equals DATABASE_URL. This often breaks migrations on pooled connections.');
+    }
+  }
+}
+
 async function runMigrationsIfEnabled() {
   const runMigrationsEnv = (process.env.RUN_PRISMA_MIGRATIONS ?? '').trim().toLowerCase();
-  const shouldRunMigrations = runMigrationsEnv === '' || runMigrationsEnv === 'true';
+  const shouldRunMigrations = runMigrationsEnv === 'true';
   if (!shouldRunMigrations) {
     console.log('[vercel-build] Skipping prisma migrate deploy during build.');
-    console.log('[vercel-build] Set RUN_PRISMA_MIGRATIONS=true (or unset it) to enable migrations.');
+    console.log('[vercel-build] Set RUN_PRISMA_MIGRATIONS=true to enable migrations.');
     return;
   }
 
@@ -61,6 +81,10 @@ async function runMigrationsIfEnabled() {
 async function main() {
   console.log('[vercel-build] Generating Prisma client...');
   await run('npx', ['prisma', 'generate']);
+
+  const runMigrationsEnv = (process.env.RUN_PRISMA_MIGRATIONS ?? '').trim().toLowerCase();
+  const shouldRunMigrations = runMigrationsEnv === 'true';
+  validateDbEnv({ shouldRunMigrations });
 
   await runMigrationsIfEnabled();
 
