@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { prisma } from '../lib/prisma';
-import { asyncHandler } from '../middleware/http';
+import { prisma } from '../lib/prisma.js';
+import { asyncHandler } from '../middleware/http.js';
 
 export const statsRouter = Router();
 
