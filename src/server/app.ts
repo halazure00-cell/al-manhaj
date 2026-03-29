@@ -1,13 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
-import { booksRouter } from './routes/books';
-import { notesRouter } from './routes/notes';
-import { habitsRouter } from './routes/habits';
-import { statsRouter } from './routes/stats';
-import { exportRouter } from './routes/export';
-import { aiRouter } from './routes/ai';
-import { healthRouter } from './routes/health';
-import { errorHandler } from './middleware/http';
+import { booksRouter } from './routes/books.js';
+import { notesRouter } from './routes/notes.js';
+import { habitsRouter } from './routes/habits.js';
+import { statsRouter } from './routes/stats.js';
+import { exportRouter } from './routes/export.js';
+import { aiRouter } from './routes/ai.js';
+import { healthRouter } from './routes/health.js';
+import { errorHandler } from './middleware/http.js';
 
 export function createApp() {
   const app = express();

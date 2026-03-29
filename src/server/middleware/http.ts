@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
-import { ValidationError } from '../lib/validation';
+import { ValidationError } from '../lib/validation.js';
 
 export function asyncHandler<T extends Request>(
   fn: (req: T, res: Response, next: NextFunction) => Promise<void | Response>

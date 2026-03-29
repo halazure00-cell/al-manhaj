@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { prisma } from '../lib/prisma';
-import { parseAiChat } from '../lib/validation';
-import { asyncHandler } from '../middleware/http';
-import { processAiQuery } from '../../services/ai.service';
+import { prisma } from '../lib/prisma.js';
+import { parseAiChat } from '../lib/validation.js';
+import { asyncHandler } from '../middleware/http.js';
+import { processAiQuery } from '../../services/ai.service.js';
 
 export const aiRouter = Router();
 

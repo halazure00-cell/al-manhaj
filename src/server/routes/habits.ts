@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { prisma } from '../lib/prisma';
-import { parseHabitCreate, parseHabitLog, parseHabitUpdate } from '../lib/validation';
-import { asyncHandler } from '../middleware/http';
+import { prisma } from '../lib/prisma.js';
+import { parseHabitCreate, parseHabitLog, parseHabitUpdate } from '../lib/validation.js';
+import { asyncHandler } from '../middleware/http.js';
 
 export const habitsRouter = Router();
 

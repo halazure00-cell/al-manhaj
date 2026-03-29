@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { Prisma } from '@prisma/client';
-import { prisma } from '../lib/prisma';
-import { parseNoteCreate, parseNoteLink, parseNoteUpdate } from '../lib/validation';
-import { asyncHandler } from '../middleware/http';
+import { prisma } from '../lib/prisma.js';
+import { parseNoteCreate, parseNoteLink, parseNoteUpdate } from '../lib/validation.js';
+import { asyncHandler } from '../middleware/http.js';
 
 export const notesRouter = Router();
 

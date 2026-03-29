@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { prisma } from '../lib/prisma';
-import { parseBookCreate, parseBooksBatch, parseBookUpdate } from '../lib/validation';
-import { asyncHandler } from '../middleware/http';
+import { prisma } from '../lib/prisma.js';
+import { parseBookCreate, parseBooksBatch, parseBookUpdate } from '../lib/validation.js';
+import { asyncHandler } from '../middleware/http.js';
 
 export const booksRouter = Router();
 
