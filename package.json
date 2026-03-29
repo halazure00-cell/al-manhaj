@@ -12,7 +12,10 @@
     "start": "NODE_ENV=production tsx server.ts",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "build:vercel": "node scripts/vercel-build.mjs"
+    "build:vercel": "node scripts/vercel-build.mjs",
+    "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev"
   },
   "dependencies": {
     "@google/genai": "^1.46.0",
