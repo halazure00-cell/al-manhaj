@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Feather, User, Database, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { apiFetch } from '../lib/api';
+import { ApiError, apiFetch } from '../lib/api';
 
 interface ChatMessage {
   id: string;
@@ -64,12 +64,26 @@ export default function Mudzakarah() {
       };
 
       setMessages(prev => [...prev, aiMsg]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
+
+      let message = 'Gagal terhubung ke AI.';
+      if (error instanceof ApiError) {
+        if (error.code === 'AI_QUOTA_EXCEEDED') {
+          message = error.retryAfterSeconds
+            ? `⚠️ Kuota AI sedang habis. Coba lagi dalam ${error.retryAfterSeconds} detik, atau ganti model/billing project Gemini.`
+            : '⚠️ Kuota AI project sedang habis atau billing belum aktif. Silakan cek quota/billing Gemini.';
+        } else {
+          message = error.message;
+        }
+      } else if (error instanceof Error && error.message) {
+        message = error.message;
+      }
+
       const errorMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: `Error: ${error.message || 'Gagal terhubung ke AI.'}`
+        content: `Error: ${message}`
       };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
