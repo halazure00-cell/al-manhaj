@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { parseNoteCreate, parseNoteLink, parseNoteUpdate } from '../lib/validation.js';
 import { asyncHandler } from '../middleware/http.js';
+import { rebuildNoteChunks } from '../lib/ai-ingestion.js';
 
 export const notesRouter = Router();
 
@@ -50,6 +51,7 @@ notesRouter.post('/', asyncHandler(async (req, res) => {
       targetLinks: { include: { sourceNote: true } },
     },
   });
+  await rebuildNoteChunks(prisma, note.id, note.content);
   res.status(201).json(note);
 }));
 
@@ -64,6 +66,7 @@ notesRouter.put('/:id', asyncHandler(async (req, res) => {
       targetLinks: { include: { sourceNote: true } },
     },
   });
+  await rebuildNoteChunks(prisma, note.id, note.content as string);
   res.json(note);
 }));
 

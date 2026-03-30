@@ -52,6 +52,22 @@ function parseHabitFrequency(value: string): HabitFrequency {
 
   return value as HabitFrequency;
 }
+
+function parseCoachMode(value: string): 'CHAT' | 'PLAN' | 'REVIEW' {
+  if (!['CHAT', 'PLAN', 'REVIEW'].includes(value)) {
+    throw new ValidationError('Field "mode" must be one of: CHAT, PLAN, REVIEW');
+  }
+
+  return value as 'CHAT' | 'PLAN' | 'REVIEW';
+}
+
+function parseFeedbackRating(value: string): 'UP' | 'DOWN' {
+  if (!['UP', 'DOWN'].includes(value)) {
+    throw new ValidationError('Field "rating" must be UP or DOWN');
+  }
+
+  return value as 'UP' | 'DOWN';
+}
 export function parseBookCreate(input: unknown): Prisma.BookCreateInput {
   const o = ensureObject(input);
   return {
@@ -165,5 +181,17 @@ export function parseHabitLog(input: unknown) {
 export function parseAiChat(input: unknown) {
   const o = ensureObject(input);
   const prompt = readString(o, 'prompt', true)!;
-  return { prompt };
+  const sessionId = readString(o, 'sessionId', false);
+  const modeValue = readString(o, 'mode', false);
+  const mode = modeValue ? parseCoachMode(modeValue) : 'CHAT';
+  const deviceKey = readString(o, 'deviceKey', false);
+  return { prompt, sessionId, mode, deviceKey };
+}
+
+export function parseAiFeedback(input: unknown) {
+  const o = ensureObject(input);
+  const messageId = readString(o, 'messageId', true)!;
+  const rating = parseFeedbackRating(readString(o, 'rating', true)!);
+  const reason = readString(o, 'reason', false);
+  return { messageId, rating, reason };
 }

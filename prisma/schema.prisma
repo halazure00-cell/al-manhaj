@@ -19,6 +19,22 @@ enum HabitFrequency {
   WEEKLY
 }
 
+enum ChatRole {
+  USER
+  AI
+}
+
+enum AiCoachMode {
+  CHAT
+  PLAN
+  REVIEW
+}
+
+enum FeedbackRating {
+  UP
+  DOWN
+}
+
 // Epic 1: Curriculum Tracking
 model Book {
   id         String     @id @default(uuid())
@@ -47,6 +63,7 @@ model Note {
   // Bi-directional Relations for Knowledge Graph
   sourceLinks NoteLink[] @relation("SourceNote")
   targetLinks NoteLink[] @relation("TargetNote")
+  chunks      NoteChunk[]
 }
 
 model NoteLink {
@@ -59,6 +76,58 @@ model NoteLink {
   targetNote Note @relation("TargetNote", fields: [targetNoteId], references: [id], onDelete: Cascade)
 
   @@unique([sourceNoteId, targetNoteId]) // Prevent duplicate links between the exact same notes
+}
+
+model NoteChunk {
+  id         String   @id @default(uuid())
+  noteId     String
+  note       Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  heading    String?
+  content    String   @db.Text
+  tokenCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([noteId, chunkIndex])
+}
+
+model ChatSession {
+  id           String        @id @default(uuid())
+  title        String?
+  summary      String?       @db.Text
+  deviceKey    String?
+  lastMode     AiCoachMode   @default(CHAT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  messages     ChatMessage[]
+
+  @@index([updatedAt])
+}
+
+model ChatMessage {
+  id            String       @id @default(uuid())
+  sessionId     String
+  session       ChatSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role          ChatRole
+  content       String       @db.Text
+  retrievalMeta Json?
+  mode          AiCoachMode  @default(CHAT)
+  createdAt     DateTime     @default(now())
+  feedback      AiFeedback?
+
+  @@index([sessionId, createdAt])
+}
+
+model AiFeedback {
+  id        String         @id @default(uuid())
+  messageId String         @unique
+  message   ChatMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  rating    FeedbackRating
+  reason    String?        @db.Text
+  createdAt DateTime       @default(now())
+
+  @@index([createdAt])
 }
 
 // Epic 3: Habit Tracker
