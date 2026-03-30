@@ -22,7 +22,7 @@ function readString(obj: Record<string, unknown>, key: string, required = true):
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new ValidationError(`Field \"${key}\" must be a non-empty string`);
   }
-  return value;
+  return value.trim();
 }
 
 function readNumber(obj: Record<string, unknown>, key: string, required = true): number | undefined {
@@ -35,6 +35,38 @@ function readNumber(obj: Record<string, unknown>, key: string, required = true):
   return num;
 }
 
+function readDate(obj: Record<string, unknown>, key: string, required = true): Date | undefined {
+  const value = obj[key];
+  if ((value === undefined || value === null || value === '') && !required) return undefined;
+  if (typeof value !== 'string') {
+    throw new ValidationError(`Field \"${key}\" must be a valid date string`);
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new ValidationError(`Field \"${key}\" must be a valid date string`);
+  }
+  return parsed;
+}
+
+function ensureIntegerInRange(value: number, key: string, min: number, max: number): number {
+  if (!Number.isInteger(value) || value < min || value > max) {
+    throw new ValidationError(`Field \"${key}\" must be an integer between ${min} and ${max}`);
+  }
+  return value;
+}
+
+function ensureNonNegativeInteger(value: number, key: string): number {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new ValidationError(`Field \"${key}\" must be a non-negative integer`);
+  }
+  return value;
+}
+
+function ensureReadPagesWithinTotal(readPages: number, totalPages: number) {
+  if (readPages > totalPages) {
+    throw new ValidationError('Field "readPages" cannot be greater than "totalPages"');
+  }
+}
 
 
 function parseBookStatus(value: string): BookStatus {
@@ -70,13 +102,21 @@ function parseFeedbackRating(value: string): 'UP' | 'DOWN' {
 }
 export function parseBookCreate(input: unknown): Prisma.BookCreateInput {
   const o = ensureObject(input);
+  const stageLevel = ensureIntegerInRange(readNumber(o, 'stageLevel', true)!, 'stageLevel', 1, 4);
+  const totalPages = ensureNonNegativeInteger(readNumber(o, 'totalPages', true)!, 'totalPages');
+  const readPages = ensureNonNegativeInteger(readNumber(o, 'readPages', false) ?? 0, 'readPages');
+  ensureReadPagesWithinTotal(readPages, totalPages);
+
   return {
     title: readString(o, 'title', true)!,
     author: readString(o, 'author', true)!,
     category: readString(o, 'category', true)!,
-    stageLevel: readNumber(o, 'stageLevel', true)!,
-    totalPages: readNumber(o, 'totalPages', true)!,
-    readPages: readNumber(o, 'readPages', false) ?? 0,
+    stageLevel,
+    totalPages,
+    readPages,
+    addedAt: readDate(o, 'addedAt', false),
+    source: o.source === null ? null : readString(o, 'source', false),
+    initialNote: o.initialNote === null ? null : readString(o, 'initialNote', false),
     status: parseBookStatus(readString(o, 'status', false) ?? BookStatus.NOT_STARTED),
   };
 }
@@ -91,14 +131,24 @@ export function parseBookUpdate(input: unknown): Prisma.BookUpdateInput {
   const totalPages = readNumber(o, 'totalPages', false);
   const readPages = readNumber(o, 'readPages', false);
   const status = readString(o, 'status', false);
+  const addedAt = readDate(o, 'addedAt', false);
+  const source = o.source === null ? null : readString(o, 'source', false);
+  const initialNote = o.initialNote === null ? null : readString(o, 'initialNote', false);
 
   if (title !== undefined) parsed.title = title;
   if (author !== undefined) parsed.author = author;
   if (category !== undefined) parsed.category = category;
-  if (stageLevel !== undefined) parsed.stageLevel = stageLevel;
-  if (totalPages !== undefined) parsed.totalPages = totalPages;
-  if (readPages !== undefined) parsed.readPages = readPages;
+  if (stageLevel !== undefined) parsed.stageLevel = ensureIntegerInRange(stageLevel, 'stageLevel', 1, 4);
+  if (totalPages !== undefined) parsed.totalPages = ensureNonNegativeInteger(totalPages, 'totalPages');
+  if (readPages !== undefined) parsed.readPages = ensureNonNegativeInteger(readPages, 'readPages');
   if (status !== undefined) parsed.status = parseBookStatus(status);
+  if (addedAt !== undefined) parsed.addedAt = addedAt;
+  if (Object.prototype.hasOwnProperty.call(o, 'source')) parsed.source = source;
+  if (Object.prototype.hasOwnProperty.call(o, 'initialNote')) parsed.initialNote = initialNote;
+
+  if (parsed.readPages !== undefined && parsed.totalPages !== undefined) {
+    ensureReadPagesWithinTotal(Number(parsed.readPages), Number(parsed.totalPages));
+  }
 
   return parsed;
 }
