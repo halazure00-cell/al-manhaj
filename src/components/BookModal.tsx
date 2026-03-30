@@ -11,10 +11,14 @@ interface BookModalProps {
 }
 
 export default function BookModal({ isOpen, onClose, onSave, book }: BookModalProps) {
+  const defaultAddedAt = new Date().toISOString().slice(0, 10);
   const [formData, setFormData] = useState<Partial<Book>>({
     title: '',
     author: '',
     category: '',
+    addedAt: defaultAddedAt,
+    source: '',
+    initialNote: '',
     stageLevel: 1,
     status: 'NOT_STARTED',
     totalPages: 0,
@@ -23,19 +27,27 @@ export default function BookModal({ isOpen, onClose, onSave, book }: BookModalPr
 
   useEffect(() => {
     if (book) {
-      setFormData(book);
+      setFormData({
+        ...book,
+        addedAt: (book.addedAt || book.createdAt).slice(0, 10),
+        source: book.source ?? '',
+        initialNote: book.initialNote ?? '',
+      });
     } else {
       setFormData({
         title: '',
         author: '',
         category: '',
+        addedAt: defaultAddedAt,
+        source: '',
+        initialNote: '',
         stageLevel: 1,
         status: 'NOT_STARTED',
         totalPages: 0,
         readPages: 0,
       });
     }
-  }, [book, isOpen]);
+  }, [book, isOpen, defaultAddedAt]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +173,41 @@ export default function BookModal({ isOpen, onClose, onSave, book }: BookModalPr
                       onChange={e => setFormData({...formData, readPages: Number(e.target.value)})}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-900 mb-1.5">Tanggal Penambahan</label>
+                  <input
+                    required
+                    type="date"
+                    className="w-full px-4 py-3 md:py-2.5 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-zinc-900 transition-colors text-base md:text-sm min-h-[44px]"
+                    value={typeof formData.addedAt === 'string' ? formData.addedAt : defaultAddedAt}
+                    onChange={e => setFormData({ ...formData, addedAt: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-900 mb-1.5">Sumber (Opsional)</label>
+                  <input
+                    type="text"
+                    dir="auto"
+                    placeholder="Contoh: Toko kitab, hadiah, PDF, waqaf..."
+                    className="w-full px-4 py-3 md:py-2.5 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-zinc-900 transition-colors text-base md:text-sm min-h-[44px]"
+                    value={typeof formData.source === 'string' ? formData.source : ''}
+                    onChange={e => setFormData({ ...formData, source: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-900 mb-1.5">Catatan Awal (Opsional)</label>
+                  <textarea
+                    dir="auto"
+                    rows={4}
+                    placeholder="Ringkas konteks kitab, tujuan baca, atau poin penting awal..."
+                    className="w-full px-4 py-3 md:py-2.5 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-zinc-900 transition-colors text-base md:text-sm leading-relaxed"
+                    value={typeof formData.initialNote === 'string' ? formData.initialNote : ''}
+                    onChange={e => setFormData({ ...formData, initialNote: e.target.value })}
+                  />
                 </div>
               </div>
 

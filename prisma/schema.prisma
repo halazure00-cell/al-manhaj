@@ -41,6 +41,9 @@ model Book {
   title      String
   author     String
   category   String   // e.g., "Theology", "Logic", "History", "Fiqh"
+  addedAt    DateTime   @default(now()) // Explicit date when the book is added to the curriculum
+  source     String?    // Optional acquisition source
+  initialNote String?   @db.Text // Optional initial context about the book
   stageLevel Int      // Roadmap progression stage (1-4)
   totalPages Int
   readPages  Int        @default(0)

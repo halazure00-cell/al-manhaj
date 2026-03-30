@@ -70,6 +70,9 @@ export default function BatchImportModal({ isOpen, onClose }: BatchImportModalPr
     "title": "Kitab Al-Hikam",
     "author": "Ibn 'Ata'illah al-Iskandari",
     "category": "Sufisme / Tasawuf",
+    "addedAt": "2026-03-30",
+    "source": "Hadiah dari guru",
+    "initialNote": "Fokus pada adab suluk dan tazkiyatun nafs.",
     "stageLevel": 3,
     "totalPages": 250
   },
@@ -77,6 +80,9 @@ export default function BatchImportModal({ isOpen, onClose }: BatchImportModalPr
     "title": "Al-Muwatta",
     "author": "Imam Malik",
     "category": "Fiqh",
+    "addedAt": "2026-03-29",
+    "source": "Toko kitab Madinah",
+    "initialNote": "Target murajaah bab thaharah dan shalat.",
     "stageLevel": 2,
     "totalPages": 600
   }
@@ -150,7 +156,7 @@ export default function BatchImportModal({ isOpen, onClose }: BatchImportModalPr
                   spellCheck="false"
                 />
                 <p className="text-xs text-zinc-500 leading-relaxed">
-                  Pastikan data berupa array JSON yang valid. Field yang didukung: <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">title</code> (wajib), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">author</code>, <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">category</code>, <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">stageLevel</code> (1-4), dan <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">totalPages</code>.
+                  Pastikan data berupa array JSON yang valid. Field yang didukung: <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">title</code> (wajib), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">author</code> (wajib), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">category</code> (wajib), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">addedAt</code> (opsional, format YYYY-MM-DD), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">source</code> (opsional), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">initialNote</code> (opsional), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">stageLevel</code> (wajib, 1-4), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">totalPages</code> (wajib), <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">readPages</code> (opsional), dan <code className="bg-zinc-100 px-1 py-0.5 rounded text-zinc-700">status</code> (opsional).
                 </p>
               </div>
             </div>

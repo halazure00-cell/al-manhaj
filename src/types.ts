@@ -3,6 +3,9 @@ export interface Book {
   title: string;
   author: string;
   category: string;
+  addedAt: string;
+  source: string | null;
+  initialNote: string | null;
   stageLevel: number;
   totalPages: number;
   readPages: number;

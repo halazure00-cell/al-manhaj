@@ -1,6 +1,6 @@
 import React from 'react';
 import { Book } from '../types';
-import { X, BookOpen, User, Tag, Layers, FileText, Calendar, CheckCircle2 } from 'lucide-react';
+import { X, BookOpen, User, Tag, Layers, FileText, Calendar, CheckCircle2, Link } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BookDetailsModalProps {
@@ -117,11 +117,34 @@ export default function BookDetailsModal({ isOpen, onClose, book }: BookDetailsM
                   <div>
                     <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-0.5">Ditambahkan</p>
                     <p className="text-sm font-medium text-zinc-900">
-                      {new Date(book.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(book.addedAt || book.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {(book.source || book.initialNote) && (
+                <div className="pt-2 space-y-3">
+                  {book.source && (
+                    <div className="flex items-start gap-3 bg-zinc-50/50 p-3 rounded-xl border border-zinc-100">
+                      <div className="p-2 bg-white rounded-lg text-zinc-500 shrink-0 shadow-sm border border-zinc-100">
+                        <Link size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-0.5">Sumber</p>
+                        <p className="text-sm font-medium text-zinc-900" dir="auto">{book.source}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {book.initialNote && (
+                    <div className="bg-zinc-50/50 p-4 rounded-xl border border-zinc-100">
+                      <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Catatan Awal</p>
+                      <p className="text-sm text-zinc-800 leading-relaxed whitespace-pre-wrap" dir="auto">{book.initialNote}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Progress Section */}
               <div className="pt-6 border-t border-zinc-100">
